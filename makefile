@@ -1,8 +1,4 @@
-all: test clear
-
+all: test
 test:
-	gcc -o test -std=c99 test.c
-	./test
-
-clear:
-	rm -rf test
+	gcc -o bloomfilter -std=c99 bloomfilter.c
+	./bloomfilter inserts.txt lookups.txt

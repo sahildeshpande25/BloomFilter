@@ -29,14 +29,14 @@ def gen_samples(n, lookup_frequency, insert_filename):
 	
 	'''generates n random strings each of variable length'''
 
-	with open(insert_filename, 'wb') as f:
+	with open(insert_filename, 'w') as f:
 
-		f.write((str(n) + '\n').encode())
+		f.write(str(n) + '\n')
 		
 		for i in range(n):
 
 			s = gen_random_string()
-			f.write((s + '\n').encode())
+			f.write(s + '\n')
 
 			if i%lookup_frequency == 0:
 				lookups.append(s)
@@ -49,9 +49,9 @@ def gen_lookups(n, lookup_filename):
 
 	pos = 0
 	
-	with open(lookup_filename, 'wb') as f:
+	with open(lookup_filename, 'w') as f:
 
-		f.write((str(n) + '\n').encode())
+		f.write(str(n) + '\n')
 
 		for i in range(n):
 
@@ -62,7 +62,7 @@ def gen_lookups(n, lookup_filename):
 			else:
 				s = gen_random_string()
 
-			f.write((s + '\n').encode())
+			f.write(s + '\n')
 
 
 if __name__ == '__main__':
@@ -70,12 +70,12 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 
 	parser.add_argument('-N', type=int, default=10000,
-		help='number of elements to be inserted')
+		help='number of elements to be inserted (default=10000)')
 	parser.add_argument('-P', type=float, default=0.2, 
 		help='percentage (0, 1) of inserted elements to lookup (rest are random)')
-	parser.add_argument('-fin', type=str, default='inserts',
+	parser.add_argument('-fin', type=str, default='inserts.txt',
 		help='filename to store generated strings for inserts')
-	parser.add_argument('-flp', type=str, default='lookups',
+	parser.add_argument('-flp', type=str, default='lookups.txt',
 		help='filename to store generated strings for lookups')
 
 	args = parser.parse_args()

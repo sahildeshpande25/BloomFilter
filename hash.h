@@ -1,6 +1,4 @@
-//
-// Created by Akul  Santhosh on 4/21/22.
-//
+#include <string.h>
 
 int* string_to_bytes(char* str){
     int n = strlen(str);

@@ -29,18 +29,30 @@ int main(){
     bits bitvector[M];
     for (int i=0; i<M; i++)
         bitvector[i].bit = 0;
-    printbitarray(bitvector);
 
     for (int i=0; i<3; i++){
-        int p = hashmix(a[i], seed1, seed2) % 15;
-        int q = murmur(a[i], seed1) % 15;
-        int r = fnv1s(a[i]) % 15;
-        printf("%s %d %d %d \n", a[i], p, q, r);
+        int p = hashmix(a[i], seed1, seed2) % M;
+        int q = murmur(a[i], seed1) % M;
+        int r = fnv1s(a[i]) % M;
+//        printf("%s %d %d %d \n", a[i], p, q, r);
         bitvector[p].bit = 1;
         bitvector[q].bit = 1;
         bitvector[r].bit = 1;
 
-        printbitarray(bitvector);
+    }
+
+    char *test[5] = {"cpp", "sahil", "akul", "random", "random2"};
+    for (int i=0; i<5; i++)
+    {
+        int p = hashmix(test[i], seed1, seed2) % M;
+        int q = murmur(test[i], seed1) % M;
+        int r = fnv1s(test[i]) % M;
+
+        printf("%d %d %d\n", p, q, r);
+        if (bitvector[p].bit == 1 && bitvector[q].bit == 1 && bitvector[r].bit == 1)
+            printf("%s may be present\n", test[i]);
+        else
+            printf("%s is not present\n", test[i]);
     }
 
     puts("");

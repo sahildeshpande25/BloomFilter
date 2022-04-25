@@ -1,11 +1,12 @@
+#include <cuda.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
 
 #define get_random rand()
 
-#define M 1000000
-#define max_str_length 3
+#define M 100000000
+#define max_str_length 8
 
 using namespace std;
 
@@ -17,9 +18,8 @@ __device__ int strlen(char *str){
     return c;
 }
 
-__device__ int* string_to_bytes(char* str){
+__device__ void string_to_bytes(char* str, int *bytes){
     int n = strlen(str);
-    static int bytes[100];
     unsigned char byte;
     int i, j, c = 0;
 
@@ -29,8 +29,6 @@ __device__ int* string_to_bytes(char* str){
             bytes[c++] = byte;
         }
     }
-
-    return bytes;
 }
 
 
@@ -40,19 +38,21 @@ __device__ int fnv1s(char* str){
     int FNVPRIME = 0x01000193;
     int FNVINIT = 0x811c9dc5;
 
-    int *p = string_to_bytes(str);
+    int bytes[100];
+    string_to_bytes(str, bytes);
     int hash = FNVINIT;
     for (int i = 0; i < strlen(str)*8; i++){
         hash *= FNVPRIME;
-        hash ^= p[i];
+        hash ^= bytes[i];
     }
 
     return abs(hash);
 }
 
 __device__ int hashmix(char* str, int a, int b) {
-    int *p = string_to_bytes(str);
-    int c = p[0];
+    int bytes[100];
+    string_to_bytes(str, bytes);
+    int c = bytes[0];
 
     for (int i = 1; i < strlen(str)*8; i++){
         a -= (b + c);  a ^= (c >> 13);
@@ -64,39 +64,24 @@ __device__ int hashmix(char* str, int a, int b) {
         a -= (b + c);  a ^= (c >> 3);
         b -= (c + a);  b ^= (a << 10);
         c -= (a + b);  c ^= (b >> 15);
-        c ^= p[i];
+        c ^= bytes[i];
     }
 
     return abs(c);
 }
 
-__device__ unsigned int murmur (char* key, int seed)
+__device__ int murmur (char* key, int seed)
 {
-    const unsigned int m = 0x5bd1e995;
-    const int r = 24;
+    int m = 0x5bd1e995;
 
     int len = strlen(key);
-    unsigned int h = seed ^ len;
+    int h = seed ^ len;
 
-    const unsigned char * data = (const unsigned char *)key;
-
-    while(len >= 4)
-    {
-        unsigned int k = *(unsigned int *)data;
-
-        k *= m;
-        k ^= k >> r;
-        k *= m;
-
-        h *= m;
-        h ^= k;
-
-        data += 4;
-        len -= 4;
-    }
+    char * data = key;
 
     switch(len)
     {
+        case 4: h ^= data[3] << 24;
         case 3: h ^= data[2] << 16;
         case 2: h ^= data[1] << 8;
         case 1: h ^= data[0];
@@ -109,6 +94,20 @@ __device__ unsigned int murmur (char* key, int seed)
 
     return h;
 }
+
+
+__device__ unsigned long
+djb2(char *str)
+{
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++)
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    return hash;
+}
+
 
 // Header code ends here
 
@@ -155,25 +154,34 @@ int main(int argc, char *argv[])
     }
 
     fscanf(fp_insert, "%d", &num_inserts);
-//    char *inserts = (char *) malloc(num_inserts*max_str_length*sizeof(char));
-    char inserts[num_inserts][max_str_length];
+
+    char *inserts = (char *) malloc(num_inserts*max_str_length*sizeof(char));
+//    char inserts[num_inserts][max_str_length];
 
 
     for (i=0; i<num_inserts; i++)
     {
-        fscanf(fp_insert, "%s", inserts[i]);
+        fscanf(fp_insert, "%s", &inserts[i*max_str_length]);
     }
+
+
 
     fclose(fp_insert);
 
-
     fscanf(fp_lookup, "%d", &num_lookups);
-    char lookups[num_lookups][max_str_length];
+//    char lookups[num_lookups][max_str_length];
+    char *lookups = (char *) malloc(num_lookups*max_str_length*sizeof(char));
 
     for (i=0; i<num_lookups; i++)
     {
-        fscanf(fp_lookup, "%s", lookups[i]);
+//        printf("%d ", i);
+        fscanf(fp_lookup, "%s", &lookups[i*max_str_length]);
     }
+
+
+
+//    for (int i = 0; i < 1000; i++)
+//        printf("%s ", lookups[i*max_str_length]);
 
     fclose(fp_lookup);
 
@@ -195,21 +203,6 @@ int main(int argc, char *argv[])
 
     cudaMemset(c_bits, 0, M*sizeof(char));
 
-//    int maybe[1] = {0};
-//    int not_found[1] = {0};
-//
-//    int *c_maybe = NULL;
-//    if (cudaMalloc((void**)&c_maybe, sizeof(maybe)) != cudaSuccess ) {
-//        printf("Error while allocating memory for maybe");
-//        exit(1);
-//    }
-//
-//    int *c_not_found = NULL;
-//    if (cudaMalloc((void**)&c_not_found, sizeof(not_found)) != cudaSuccess ) {
-//        printf("Error while allocating memory for not found");
-//        exit(1);
-//    }
-
     char *c_maybe = NULL;
     if (cudaMalloc((void**)&c_maybe, num_lookups*sizeof(char)) != cudaSuccess ) {
         printf("Error while allocating memory for maybe array");
@@ -228,7 +221,7 @@ int main(int argc, char *argv[])
     }
 
     if (cudaMemcpy(c_lookups, lookups, num_lookups*max_str_length*sizeof(char), cudaMemcpyHostToDevice) != cudaSuccess) {
-        printf("Error while copying to device from Host for insert array");
+        printf("Error while copying to device from Host for lookup array");
         exit(1);
     }
 
@@ -236,11 +229,12 @@ int main(int argc, char *argv[])
     insert_parallel<<<no_of_block, 64>>>(c_inserts, c_bits, num_inserts, seed1, seed2);
     cudaDeviceSynchronize();
 
+
     int no_of_block_lookups = (int)(num_lookups/64) + 1;
     lookup_parallel<<<no_of_block_lookups, 64>>>(c_lookups, c_bits, num_lookups, seed1, seed2, c_maybe);
     cudaDeviceSynchronize();
 
-    char maybe[num_lookups];
+    char *maybe = (char *) malloc(num_lookups*sizeof(char));
 
     cudaMemcpy(maybe, c_maybe, num_lookups*sizeof(char), cudaMemcpyDeviceToHost);
 
@@ -259,21 +253,27 @@ __global__ void insert_parallel(char *inserts, char *bits, int size, int seed1, 
     unsigned int i = (blockIdx.x * blockDim.x) + threadIdx.x;
     if (i < size){
         int p = hashmix(&inserts[i*max_str_length], seed1, seed2) % M;
-        int q = murmur(&inserts[i*max_str_length], seed1) % M;
+        int w = djb2(&inserts[i*max_str_length]) % M;
+//        int w = murmur(&inserts[i*max_str_length], seed1) % M;
         int r = fnv1s(&inserts[i*max_str_length]) % M;
         bits[p] = 1;
-        bits[q] = 1;
+        bits[w] = 1;
         bits[r] = 1;
+//        printf("%d - %c, ", w, bits[w]+48);
     }
 }
 
 __global__ void lookup_parallel(char *inserts, char *bits, int size, int seed1, int seed2, char *maybe){
     unsigned int i = (blockIdx.x * blockDim.x) + threadIdx.x;
     if (i < size){
+
         int p = hashmix(&inserts[i*max_str_length], seed1, seed2) % M;
-        int q = murmur(&inserts[i*max_str_length], seed1) % M;
+        int w = djb2(&inserts[i*max_str_length]) % M;
+//        int w = murmur(&inserts[i*max_str_length], seed1) % M;
         int r = fnv1s(&inserts[i*max_str_length]) % M;
-        if (bits[p] == 1 && bits[q] == 1 && bits[r] == 1) maybe[i] = 1;
+        if (bits[p] == 1 && bits[w] == 1 && bits[r] == 1) maybe[i] = 1;
         else maybe[i] = 0;
+//            if (bits[w] == 1) maybe[i] = 1;
+//            else maybe[i] = 0;
     }
 }

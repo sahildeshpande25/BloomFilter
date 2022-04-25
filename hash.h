@@ -80,6 +80,7 @@ unsigned int murmur (char* key, int seed)
 
     switch(len)
     {
+        case 4: h ^= data[3] << 24;
         case 3: h ^= data[2] << 16;
         case 2: h ^= data[1] << 8;
         case 1: h ^= data[0];
@@ -91,5 +92,17 @@ unsigned int murmur (char* key, int seed)
     h ^= h >> 15;
 
     return h;
+}
+
+unsigned long
+djb2(char *str)
+{
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++)
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    return hash;
 }
 

@@ -10,8 +10,8 @@ class Constants:
 	
 	characters = list(string.ascii_letters + string.digits)
 	random.shuffle(characters)
-	min_len = 3
-	max_len = 10
+	min_len = 1
+	max_len = 3
 	lookup_insert_ratio = 10
 
 def gen_random_string():

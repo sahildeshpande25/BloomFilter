@@ -16,10 +16,13 @@ int* string_to_bytes(char* str){
     return bytes;
 }
 
-int FNVPRIME = 0x01000193;
-int FNVINIT = 0x811c9dc5;
+
 
 int fnv1s(char* str){
+
+    int FNVPRIME = 0x01000193;
+    int FNVINIT = 0x811c9dc5;
+
     int *p = string_to_bytes(str);
     int hash = FNVINIT;
     for (int i = 0; i < strlen(str)*8; i++){

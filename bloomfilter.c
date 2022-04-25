@@ -5,15 +5,15 @@
 
 #define get_random rand()
 
-#define M 10000000
-#define max_str_length 11
+#define M 1000000
+#define max_str_length 3
 
 typedef struct
 {
     unsigned int bit:1;
 }bits;
 
-void printbitarray(bits *bitarray)
+void print_bit_array(bits *bitarray)
 {
     for (int i=0; i<M; i++)
         if(bitarray[i].bit == 1)
@@ -104,6 +104,8 @@ int main(int argc, char *argv[])
         else
             notp++;
     }
+
+//    print_bit_array(bitvector);
 
     printf("Maybe present: %llu\nNot present: %llu\n", maybe, notp);
 

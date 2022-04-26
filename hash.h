@@ -1,13 +1,16 @@
 #include <string.h>
 
-int* string_to_bytes(char* str){
+int* string_to_bytes(char* str)
+{
     int n = strlen(str);
     static int bytes[100];
     unsigned char byte;
     int i, j, c = 0;
 
-    for (i = 0; i < n ; i++){
-        for (j = 7; j >= 0; j--) {
+    for (i = 0; i < n ; i++)
+    {
+        for (j = 7; j >= 0; j--)
+        {
             byte = (str[i] >> j) & 1;
             bytes[c++] = byte;
         }
@@ -17,15 +20,16 @@ int* string_to_bytes(char* str){
 }
 
 
-
-int fnv1s(char* str){
+int fnv1s(char* str)
+{
 
     int FNVPRIME = 0x01000193;
     int FNVINIT = 0x811c9dc5;
 
     int *p = string_to_bytes(str);
     int hash = FNVINIT;
-    for (int i = 0; i < strlen(str)*8; i++){
+    for (int i = 0; i < strlen(str)*8; i++)
+    {
         hash *= FNVPRIME;
         hash ^= p[i];
     }
@@ -33,11 +37,13 @@ int fnv1s(char* str){
     return abs(hash);
 }
 
-int hashmix(char* str, int a, int b) {
+int hashmix(char* str, int a, int b)
+{
     int *p = string_to_bytes(str);
     int c = p[0];
 
-    for (int i = 1; i < strlen(str)*8; i++){
+    for (int i = 1; i < strlen(str)*8; i++)
+    {
         a -= (b + c);  a ^= (c >> 13);
         b -= (c + a);  b ^= (a << 8);
         c -= (a + b);  c ^= (b >> 13);
@@ -94,15 +100,13 @@ unsigned int murmur (char* key, int seed)
     return h;
 }
 
-unsigned long
-djb2(char *str)
+unsigned long djb2(char *str)
 {
     unsigned long hash = 5381;
     int c;
 
     while (c = *str++)
-        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+        hash = ((hash << 5) + hash) + c;
 
     return hash;
 }
-

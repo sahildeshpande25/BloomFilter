@@ -16,10 +16,13 @@ int* string_to_bytes(char* str){
     return bytes;
 }
 
-int FNVPRIME = 0x01000193;
-int FNVINIT = 0x811c9dc5;
+
 
 int fnv1s(char* str){
+
+    int FNVPRIME = 0x01000193;
+    int FNVINIT = 0x811c9dc5;
+
     int *p = string_to_bytes(str);
     int hash = FNVINIT;
     for (int i = 0; i < strlen(str)*8; i++){
@@ -77,6 +80,7 @@ unsigned int murmur (char* key, int seed)
 
     switch(len)
     {
+        case 4: h ^= data[3] << 24;
         case 3: h ^= data[2] << 16;
         case 2: h ^= data[1] << 8;
         case 1: h ^= data[0];
@@ -88,5 +92,17 @@ unsigned int murmur (char* key, int seed)
     h ^= h >> 15;
 
     return h;
+}
+
+unsigned long
+djb2(char *str)
+{
+    unsigned long hash = 5381;
+    int c;
+
+    while (c = *str++)
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    return hash;
 }
 

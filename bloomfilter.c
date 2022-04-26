@@ -5,19 +5,21 @@
 
 #define get_random rand()
 
-#define M 10000000
-#define max_str_length 11
+#define M 100000000
+#define max_str_length 8
+#define multiplier 191
 
 typedef struct
 {
     unsigned int bit:1;
 }bits;
 
-void printbitarray(bits *bitarray)
+void print_bit_array(bits *bitarray)
 {
     for (int i=0; i<M; i++)
-        if(bitarray[i].bit == 1)
-            printf("%u ", i);
+        printf("%d ", bitarray[i].bit);
+//        if(bitarray[i].bit == 1)
+//            printf("%u ", i);
     printf("\n");
 }
 
@@ -83,7 +85,8 @@ int main(int argc, char *argv[])
 
     for (i=0; i<num_inserts; i++){
         int p = hashmix(inserts[i], seed1, seed2) % M;
-        int q = murmur(inserts[i], seed1) % M;
+        int q = djb2(inserts[i]) % M;
+//        int q = murmur(lookups[i], seed1) % M;
         int r = fnv1s(inserts[i]) % M;
         bitvector[p].bit = 1;
         bitvector[q].bit = 1;
@@ -96,14 +99,18 @@ int main(int argc, char *argv[])
     for (i=0; i<num_lookups; i++)
     {
         p = hashmix(lookups[i], seed1, seed2) % M;
-        q = murmur(lookups[i], seed1) % M;
+        q = djb2(lookups[i]) % M;
+//        q = murmur(lookups[i], seed1) % M;
         r = fnv1s(lookups[i]) % M;
 
-        if (bitvector[p].bit == 1 && bitvector[q].bit == 1 && bitvector[r].bit == 1)
+        if (bitvector[p].bit == 1 && bitvector[q].bit == 1  && bitvector[r].bit == 1)
+//        if (bitvector[q].bit == 1)
             maybe++;
         else
             notp++;
     }
+
+//    print_bit_array(bitvector);
 
     printf("Maybe present: %llu\nNot present: %llu\n", maybe, notp);
 

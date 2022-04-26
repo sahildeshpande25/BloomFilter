@@ -5,13 +5,15 @@ import random
 import argparse
 
 lookups = list()
+inserts = list()
+lookups_set = list()
 
 class Constants:
 	
 	characters = list(string.ascii_letters + string.digits)
 	random.shuffle(characters)
-	min_len = 3
-	max_len = 10
+	min_len = 1
+	max_len = 8
 	lookup_insert_ratio = 10
 
 def gen_random_string():
@@ -30,16 +32,24 @@ def gen_samples(n, lookup_frequency, insert_filename):
 	'''generates n random strings each of variable length'''
 
 	with open(insert_filename, 'w') as f:
-
-		f.write(str(n) + '\n')
+		global inserts
+		# f.write(str(n) + '\n')
 		
 		for i in range(n):
 
 			s = gen_random_string()
-			f.write(s + '\n')
+			# f.write(s + '\n')
+			inserts.append(s + '\n')
 
 			if i%lookup_frequency == 0:
-				lookups.append(s)
+				lookups.append(s + '\n')
+
+		inserts = list(set(inserts))
+		n = len(inserts)
+		f.write(str(n) + '\n')
+
+		for i in inserts:
+			f.write(i)
 
 
 def gen_lookups(n, lookup_filename):
@@ -50,8 +60,8 @@ def gen_lookups(n, lookup_filename):
 	pos = 0
 	
 	with open(lookup_filename, 'w') as f:
-
-		f.write(str(n) + '\n')
+		global lookups_set
+		# f.write(str(n) + '\n')
 
 		for i in range(n):
 
@@ -62,7 +72,15 @@ def gen_lookups(n, lookup_filename):
 			else:
 				s = gen_random_string()
 
-			f.write(s + '\n')
+			lookups_set.append(s + '\n')
+			# f.write(s + '\n')
+
+		lookups_set = list(set(lookups_set))
+		n = len(lookups_set)
+		f.write(str(n) + '\n')
+
+		for i in lookups_set:
+			f.write(i)
 
 
 if __name__ == '__main__':

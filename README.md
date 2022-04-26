@@ -27,6 +27,6 @@ Steps to generate random insert and lookup files
     <br> ```<num>``` is the number of random strings to be inserted (default=10000)
     <br> ```<lookup_percent>``` is the percentage (0,1) of the generated inserts to be looked up (default=0.2)
     <br> The ratio of lookups to inserts is 10:1 so the remaining lookups are randomly generated 
-    <br><br> ```<inserts_filename.txt>``` is the filename to store the generated inserts (default='inserts.txt')
-    <br> ```<lookups_filename.txt>``` is the filename to store the generated lookups (default='lookups.txt')
+    <br><br> ```<inserts_filename.txt>``` is the filename to store the generated inserts (default=inserts.txt)
+    <br> ```<lookups_filename.txt>``` is the filename to store the generated lookups (default=lookups.txt)
     <br><br> Note: The number of generated strings for insertions and lookups is lesser than the actual value since duplicate strings are filtered out to measure performance of the bloom filter.

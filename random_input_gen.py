@@ -68,11 +68,13 @@ def gen_lookups(n, lookup_filename):
 			if (pos < len(lookups) and random.uniform(0, 1) > 0.5):
 				s = lookups[pos]
 				pos += 1
+				lookups_set.append(s)
 
 			else:
 				s = gen_random_string()
+				lookups_set.append(s + '\n')
 
-			lookups_set.append(s + '\n')
+
 			# f.write(s + '\n')
 
 		lookups_set = list(set(lookups_set))

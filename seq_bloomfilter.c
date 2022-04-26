@@ -106,7 +106,12 @@ int main(int argc, char *argv[])
             notp++;
     }
 
-    printf("Maybe present: %llu\nNot present: %llu\n", maybe, notp);
+    printf("\nCPU Version (Sequential)\n");
+    printf("\nNumber of inserts: %10d\n", num_inserts);
+    printf("Number of lookups: %10d\n", num_lookups);
+    printf("\nLookup Summary:\n");
+    printf("Number of elements that MAY BE present:  %10d\n", maybe);
+    printf("Number of elements that are NOT present: %10d\n\n", notp);
 
     return 0;
 }

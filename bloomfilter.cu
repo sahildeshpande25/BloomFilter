@@ -240,7 +240,12 @@ int main(int argc, char *argv[])
         else count_notp++;
     }
 
-    printf("Maybe present: %llu\nNot present: %llu\n", count_maybe, count_notp);
+    printf("\nGPU Version (Parallel)\n");
+    printf("\nNumber of inserts: %10d\n", num_inserts);
+    printf("Number of lookups: %10d\n", num_lookups);
+    printf("\nLookup Summary:\n");
+    printf("Number of elements that MAY BE present:  %10d\n", count_maybe);
+    printf("Number of elements that are NOT present: %10d\n\n", count_notp);
 
     return 0;
 }

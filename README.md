@@ -1,10 +1,10 @@
 # BloomFilter 
+<a href="https://github.com/sahildeshpande25/">
+  <img src="https://contrib.rocks/image?repo=sahildeshpande25/web-scraper" />
+</a>
 <a href="https://github.com/akulsanthosh/">
   <img src="https://contrib.rocks/image?repo=akulsanthosh/Video-Colorization" />
 </a> 
-<a href="https://github.com/sahildeshpande25/">
-  <img src="https://contrib.rocks/image?repo=sahildeshpande25/test" />
-</a>
 
 Steps to run sequential (CPU) code
 1.  ```gcc -o seq_bloomfilter -std=c99 seq_bloomfilter.c```
